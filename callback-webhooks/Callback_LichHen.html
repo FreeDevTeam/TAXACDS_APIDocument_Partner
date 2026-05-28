@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Callback / Webhooks - Lịch hẹn</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
+    .wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #dbe3ef; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+    h1, h2 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #dbe3ef; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #eef3fb; }
+    pre { background: #0f172a; color: #e5ecf6; padding: 12px; border-radius: 10px; overflow-x: auto; }
+    a { color: #0b63ce; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Callback / Webhooks - Lịch hẹn</h1>
+      <p>Mô tả dữ liệu mà đối tác nhận được khi hệ thống gửi callback liên quan đến lịch hẹn do chính đối tác tạo.</p>
+      <p><a href="../index.html">Về trang chủ Partner API Documentation</a></p>
+    </div>
+
+    <div class="card">
+      <h2>Phạm vi dữ liệu</h2>
+      <p>Chỉ truy cập những dữ liệu mà đối tác tạo ra.</p>
+    </div>
+
+    <div class="card">
+      <h2>Cấu trúc payload callback</h2>
+      <pre>{
+  "callbackData": {
+    "customerScheduleId": 456789,
+    "licensePlates": "30A84812",
+    "phone": "0382716917",
+    "fullnameSchedule": "Nguyễn Văn A",
+    "email": "user@example.com",
+    "dateSchedule": "20260515",
+    "time": "10:00",
+    "notificationMethod": "SMS",
+    "vehicleType": 1,
+    "licensePlateColor": 1,
+    "scheduleSerial": 1,
+    "scheduleCode": "SCH-20260515-0001",
+    "CustomerScheduleStatus": 3,
+    "scheduleNote": "Ghi chú lịch hẹn",
+    "scheduleType": 1,
+    "scheduleHash": "abc123hash",
+    "confirmStatus": 1,
+    "scheduleTracking": "TRACKING_ID_001",
+    "customerReceiptId": 789,
+    "partnerName": "Đối tác A",
+    "partnerTranID": "REQ_202605150001",
+    "daySchedule": "20260515",
+    "projectName": "Kiemdinhoto_StationServer",
+    "createdAt": "2026-05-15T10:20:30.000Z",
+    "updatedAt": "2026-05-15T10:20:40.000Z"
+  }
+}</pre>
+    </div>
+
+    <div class="card">
+      <h2>Dữ liệu callback</h2>
+      <table>
+        <tr><th>Field</th><th>Type</th><th>Mô tả</th></tr>
+        <tr><td>customerScheduleId</td><td>number</td><td>Mã lịch hẹn (primary key).</td></tr>
+        <tr><td>licensePlates</td><td>string</td><td>Biển số xe đã đặt lịch.</td></tr>
+        <tr><td>phone</td><td>string</td><td>Số điện thoại liên hệ.</td></tr>
+        <tr><td>fullnameSchedule</td><td>string</td><td>Tên người đặt lịch.</td></tr>
+        <tr><td>email</td><td>string</td><td>Email người dùng.</td></tr>
+        <tr><td>dateSchedule</td><td>string</td><td>Ngày đặt lịch, định dạng YYYYMMDD.</td></tr>
+        <tr><td>time</td><td>string</td><td>Giờ đặt lịch.</td></tr>
+        <tr><td>notificationMethod</td><td>string</td><td>Kênh gửi thông báo.</td></tr>
+        <tr><td>vehicleType</td><td>number</td><td>Loại phương tiện.</td></tr>
+        <tr><td>licensePlateColor</td><td>number</td><td>Màu biển số.</td></tr>
+        <tr><td>scheduleSerial</td><td>number</td><td>Số thứ tự lịch hẹn.</td></tr>
+        <tr><td>scheduleCode</td><td>string</td><td>Mã định danh lịch hẹn.</td></tr>
+        <tr><td>CustomerScheduleStatus</td><td>number</td><td>Trạng thái xử lý lịch hẹn.</td></tr>
+        <tr><td>scheduleNote</td><td>string</td><td>Ghi chú cho lịch hẹn.</td></tr>
+        <tr><td>scheduleType</td><td>number</td><td>Loại lịch hẹn.</td></tr>
+        <tr><td>scheduleHash</td><td>string</td><td>Hash để xác thực lịch hẹn.</td></tr>
+        <tr><td>confirmStatus</td><td>number</td><td>Trạng thái xác nhận.</td></tr>
+        <tr><td>scheduleTracking</td><td>string</td><td>Mã theo dõi lịch hẹn.</td></tr>
+        <tr><td>customerReceiptId</td><td>number</td><td>Mã hóa đơn liên quan.</td></tr>
+        <tr><td>partnerName</td><td>string</td><td>Tên đối tác đặt lịch.</td></tr>
+        <tr><td>partnerTranID</td><td>string</td><td>Mã giao dịch từ đối tác.</td></tr>
+        <tr><td>daySchedule</td><td>string</td><td>Ngày đặt lịch (định dạng YYYYMMDD) dùng để sort.</td></tr>
+        <tr><td>projectName</td><td>string</td><td>Tên hệ thống phát sinh bản ghi.</td></tr>
+        <tr><td>createdAt</td><td>datetime</td><td>Thời điểm lịch hẹn được tạo.</td></tr>
+        <tr><td>updatedAt</td><td>datetime</td><td>Thời điểm cập nhật gần nhất.</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Bảng liệt kê trạng thái</h2>
+      <h3>CustomerScheduleStatus - Trạng thái xử lý lịch hẹn</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>0</td><td>Chưa xác nhận.</td></tr>
+        <tr><td>10</td><td>Đã xác nhận.</td></tr>
+        <tr><td>20</td><td>Đã hủy.</td></tr>
+        <tr><td>30</td><td>Đã đóng.</td></tr>
+      </table>
+      <h3>scheduleType - Loại lịch hẹn</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>Đăng kiểm xe cũ.</td></tr>
+        <tr><td>2</td><td>Đăng ký dán thẻ EPASS.</td></tr>
+        <tr><td>3</td><td>Nộp hồ sơ xe mới.</td></tr>
+        <tr><td>4</td><td>Đổi mục đích sử dụng / đổi chủ / đổi thông tin hồ sơ.</td></tr>
+        <tr><td>5</td><td>Thanh toán phí đường bộ.</td></tr>
+        <tr><td>7</td><td>Đặt lịch tư vấn bảo dưỡng.</td></tr>
+        <tr><td>8</td><td>Đặt lịch tư vấn bảo hiểm.</td></tr>
+        <tr><td>9</td><td>Đặt lịch tư vấn hoán cải.</td></tr>
+        <tr><td>10</td><td>Mất giấy đăng kiểm.</td></tr>
+        <tr><td>11</td><td>Cấp lại tem đăng kiểm.</td></tr>
+        <tr><td>12</td><td>Tư vấn đăng kiểm xe.</td></tr>
+        <tr><td>13</td><td>Tư vấn xử lý phạt nguội.</td></tr>
+        <tr><td>14</td><td>Tư vấn bảo hiểm TNDS xe ô tô.</td></tr>
+        <tr><td>15</td><td>Tra cứu cảnh báo đăng kiểm.</td></tr>
+        <tr><td>16</td><td>Hỗ trợ xử lý phạt nguội.</td></tr>
+        <tr><td>17</td><td>Gia hạn định vị.</td></tr>
+        <tr><td>18</td><td>Gia hạn phù hiệu xe kinh doanh.</td></tr>
+        <tr><td>19</td><td>Gia hạn giấy tập huấn.</td></tr>
+        <tr><td>20</td><td>Gia hạn camera hành trình.</td></tr>
+        <tr><td>21</td><td>Đăng ký dán thẻ VETC.</td></tr>
+        <tr><td>22</td><td>Gia hạn BH TNDS.</td></tr>
+        <tr><td>23</td><td>Nộp hồ sơ xe mới (ngoài giờ hành chính).</td></tr>
+        <tr><td>24</td><td>Đăng kiểm xe (ngoài giờ hành chính).</td></tr>
+        <tr><td>25</td><td>Tư vấn bồi thường bảo hiểm.</td></tr>
+        <tr><td>26</td><td>Tư vấn sức khỏe lái xe.</td></tr>
+        <tr><td>27</td><td>Bán vé điện tử.</td></tr>
+      </table>
+      <h3>vehicleType - Loại phương tiện</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>Ô tô.</td></tr>
+        <tr><td>10</td><td>Xe khác.</td></tr>
+        <tr><td>20</td><td>Rơ moóc.</td></tr>
+      </table>
+      <h3>licensePlateColor - Màu biển số</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>Trắng.</td></tr>
+        <tr><td>2</td><td>Xanh.</td></tr>
+        <tr><td>3</td><td>Vàng.</td></tr>
+        <tr><td>4</td><td>Đỏ.</td></tr>
+      </table>
+      <h3>confirmStatus - Trạng thái xác nhận</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>0</td><td>Chưa xác nhận.</td></tr>
+        <tr><td>1</td><td>Đã xác nhận.</td></tr>
+        <tr><td>2</td><td>Đã hủy.</td></tr>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

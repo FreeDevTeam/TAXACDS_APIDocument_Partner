@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{API_TITLE}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
+    .wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #dbe3ef; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+    h1, h2 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #dbe3ef; padding: 8px; text-align: left; }
+    th { background: #eef3fb; }
+    pre { background: #0f172a; color: #e5ecf6; padding: 12px; border-radius: 10px; overflow-x: auto; }
+    a { color: #0b63ce; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { background: #0b63ce; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; margin-right: 8px; }
+    #toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 10px 22px; border-radius: 8px; font-size: 0.95em; opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 9999; }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Card 1: Header -->
+    <div class="card">
+      <h1>Partner API - {API_NAME}</h1>
+      <p>{SHORT_DESCRIPTION}</p>
+      <p><a href="./index.html">Về module {MODULE_NAME}</a></p>
+    </div>
+
+    <!-- Card 2: Endpoint — chỉ URL, Method. Không thêm Batch size hay Auth row -->
+    <div class="card">
+      <h2>Endpoint</h2>
+      <table>
+        <tr><th>URL</th><td>{ENDPOINT_URL}</td></tr>
+        <tr><th>Method</th><td>{HTTP_METHOD}</td></tr>
+      </table>
+    </div>
+
+    <!-- Card 3: Headers schema — tách riêng, không gộp vào Endpoint -->
+    <div class="card">
+      <h2>Headers schema</h2>
+      <table>
+        <tr><th>Header</th><th>Required</th><th>Mô tả</th></tr>
+        <tr><td>clientId <em>hoặc</em> clientid</td><td>Yes</td><td>Mã định danh đối tác</td></tr>
+        <tr><td>apiKey <em>hoặc</em> apikey</td><td>Yes</td><td>Khóa xác thực API của đối tác</td></tr>
+      </table>
+    </div>
+
+    <!-- Card 4: Body schema — bảng 5 cột: Field | Type | Required | Rule | Mô tả -->
+    <div class="card">
+      <h2>Body schema</h2>
+      <table>
+        <tr><th>Field</th><th>Type</th><th>Required</th><th>Rule</th><th>Mô tả</th></tr>
+        <!-- Thêm hàng theo schema thực tế -->
+        <tr><td>{FIELD_NAME}</td><td>{TYPE}</td><td>Yes/No</td><td>{RULE}</td><td>{DESCRIPTION}</td></tr>
+      </table>
+    </div>
+
+    <!-- Card 5: Sample Request — tiêu đề + nút copy icon + Toast khi copy thành công -->
+    <div class="card">
+      <h2 style="display:flex;align-items:center;gap:8px;">Sample Request <button id="copySampleBtn" title="Copy sang clipboard" style="background:none;border:1px solid #dbe3ef;border-radius:6px;padding:4px 8px;cursor:pointer;display:inline-flex;align-items:center;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#0b63ce" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg></button></h2>
+      <pre id="curlText">curl --location '{HOST_NAME}{ENDPOINT_URL}' \
+  --header 'Content-Type: application/json' \
+  --header 'clientId: TESTCLIENT' \
+  --header 'apiKey: {TEST_API_KEY}' \
+  --data '{
+    {REQUEST_BODY}
+  }'</pre>
+    </div>
+
+    <!-- Card 6: Success response -->
+    <div class="card">
+      <h2>Success response</h2>
+      <pre>{
+  "statusCode": 200,
+  "error": null,
+  "message": "Success",
+  "data": {SUCCESS_DATA}
+}</pre>
+    </div>
+
+    <!-- Card 7: Mã lỗi — KHÔNG ghi Nguồn file, KHÔNG ghi tên hàm/middleware nội bộ trong mô tả.
+         400 = Validation Error (Joi schema fail)
+         429 = QUOTA_EXCEEDED (apiKey sai/hết quota)
+         500 = mọi lỗi từ manager
+         Chỉ liệt kê error code thực sự được throw trong manager. Luôn có UNKNOWN_ERROR. -->
+    <div class="card">
+      <h2>Mã lỗi</h2>
+      <table>
+        <tr><th style="width:100px">HTTP</th><th style="width:35%">Mã lỗi</th><th>Mô tả</th></tr>
+        <tr><td>400</td><td><em>Validation Error</em></td><td>Payload không đúng schema (thiếu field bắt buộc, sai kiểu, vượt giới hạn).</td></tr>
+        <tr><td>429</td><td><code>QUOTA_EXCEEDED</code></td><td>apiKey không hợp lệ hoặc vượt quota.</td></tr>
+        <tr><td>500</td><td><code>{ERROR_CODE}</code></td><td>{DESCRIPTION}</td></tr>
+        <tr><td>500</td><td><code>UNKNOWN_ERROR</code></td><td>Lỗi không xác định.</td></tr>
+      </table>
+    </div>
+
+    <!-- Card 8: Tham khảo — BẮTBUỘC, link tới Common.html; điều chỉnh các mục cho phù hợp API -->
+    <div class="card">
+      <h2>Tham khảo</h2>
+      <ul>
+        <li><a href="../../Common.html#common-error">Quy chuẩn chung → Common Error</a> — danh sách mã lỗi hệ thống trả về trong trường <code>error</code>.</li>
+        <!-- Thêm dòng dưới nếu API có field paymentStatus -->
+        <li><a href="../../Common.html#payment-status">Quy chuẩn chung → Order Payment Status</a> — danh sách giá trị hợp lệ của trường <code>paymentStatus</code>.</li>
+      </ul>
+    </div>
+
+    <!-- Card 9: Data test -->
+    <div class="card">
+      <h2>Data test cho developer</h2>
+      <ul>
+        <li>clientId: TESTCLIENT</li>
+        <li>apiKey: {TEST_API_KEY}</li>
+        <!-- Thêm các field test tương ứng với schema -->
+      </ul>
+      <p>Cần thay bằng dữ liệu môi trường thật khi tích hợp.</p>
+    </div>
+
+  </div>
+
+  <script>
+    const copySampleBtn = document.getElementById('copySampleBtn');
+    const curlText = document.getElementById('curlText').textContent;
+
+    copySampleBtn.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(curlText);
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    });
+  </script>
+  <div id="toast">Sao chép thành công</div>
+</body>
+</html>

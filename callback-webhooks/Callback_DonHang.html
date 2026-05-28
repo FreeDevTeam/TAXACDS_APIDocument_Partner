@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Callback / Webhooks - Đơn hàng</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
+    .wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #dbe3ef; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+    h1, h2 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #dbe3ef; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #eef3fb; }
+    pre { background: #0f172a; color: #e5ecf6; padding: 12px; border-radius: 10px; overflow-x: auto; }
+    a { color: #0b63ce; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Callback / Webhooks - Đơn hàng</h1>
+      <p>Mô tả dữ liệu đối tác nhận được khi hệ thống gửi callback về trạng thái và thông tin thanh toán của đơn hàng do đối tác tạo.</p>
+      <p><a href="../index.html">Về trang chủ Partner API Documentation</a></p>
+    </div>
+
+    <div class="card">
+      <h2>Phạm vi dữ liệu</h2>
+      <p>Chỉ truy cập những dữ liệu mà đối tác tạo ra.</p>
+    </div>
+
+    <div class="card">
+      <h2>Cấu trúc payload callback</h2>
+      <pre>{
+  "callbackData": {
+    "orderId": 123456,
+    "orderRefId": "REQ_202605150001",
+    "orderName": "Đơn mua gói dịch vụ",
+    "orderCode": "ORD-20260515-0001",
+    "orderStatus": 3,
+    "paymentStatus": "Success",
+    "subTotalAmount": 91000,
+    "discountAmount": 0,
+    "taxAmount": 0,
+    "totalAmount": 91000,
+    "paidAmount": 91000,
+    "extraFee": 0,
+    "paymentMethodType": 13,
+    "orderType": 1,
+    "orderCategory": 1,
+    "salesChannel": "TAMOVE",
+    "orderPaymentTime": "2026-05-15 10:20:30",
+    "orderPaymentInfo": "{...}",
+    "createdAt": "2026-05-15T10:20:30.000Z",
+    "updatedAt": "2026-05-15T10:20:40.000Z"
+  }
+}</pre>
+    </div>
+
+    <div class="card">
+      <h2>Dữ liệu callback</h2>
+      <table>
+        <tr><th>Field</th><th>Type</th><th>Mô tả</th></tr>
+        <tr><td>orderId</td><td>number</td><td>Mã đơn hàng nội bộ.</td></tr>
+        <tr><td>orderRefId</td><td>string</td><td>Mã đơn hàng/phiên giao dịch do đối tác gửi sang.</td></tr>
+        <tr><td>orderName</td><td>string</td><td>Tên hiển thị của đơn hàng.</td></tr>
+        <tr><td>orderCode</td><td>string</td><td>Mã định danh đơn hàng.</td></tr>
+        <tr><td>orderStatus</td><td>number</td><td>Trạng thái xử lý đơn hàng.</td></tr>
+        <tr><td>paymentStatus</td><td>string</td><td>Trạng thái thanh toán của đơn hàng.</td></tr>
+        <tr><td>subTotalAmount</td><td>number</td><td>Tổng tiền trước thuế và giảm giá.</td></tr>
+        <tr><td>discountAmount</td><td>number</td><td>Số tiền được giảm.</td></tr>
+        <tr><td>taxAmount</td><td>number</td><td>Tiền thuế của đơn hàng.</td></tr>
+        <tr><td>totalAmount</td><td>number</td><td>Tổng tiền cần thanh toán.</td></tr>
+        <tr><td>paidAmount</td><td>number</td><td>Số tiền đã thanh toán.</td></tr>
+        <tr><td>extraFee</td><td>number</td><td>Phụ phí phát sinh (nếu có).</td></tr>
+        <tr><td>paymentMethodType</td><td>number</td><td>Loại phương thức thanh toán.</td></tr>
+        <tr><td>orderType</td><td>number</td><td>Loại đơn hàng.</td></tr>
+        <tr><td>orderCategory</td><td>number</td><td>Nhóm phân loại đơn hàng.</td></tr>
+        <tr><td>salesChannel</td><td>string</td><td>Kênh phát sinh đơn hàng.</td></tr>
+        <tr><td>orderPaymentTime</td><td>datetime</td><td>Thời điểm thanh toán gần nhất.</td></tr>
+        <tr><td>orderPaymentInfo</td><td>string</td><td>Thông tin thanh toán chi tiết.</td></tr>
+        <tr><td>createdAt</td><td>datetime</td><td>Thời điểm bản ghi đơn hàng được tạo.</td></tr>
+        <tr><td>updatedAt</td><td>datetime</td><td>Thời điểm cập nhật gần nhất.</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Bảng liệt kê trạng thái</h2>
+      <h3>orderStatus - Trạng thái xử lý đơn hàng</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Tên</th><th>Mô tả</th></tr>
+        <tr><td>0</td><td>Chưa xác nhận</td><td>Đơn hàng mới được tạo.</td></tr>
+        <tr><td>10</td><td>Đã xác nhận</td><td>Đơn hàng được xác nhận.</td></tr>
+        <tr><td>20</td><td>Đã hủy</td><td>Đơn hàng bị hủy.</td></tr>
+        <tr><td>30</td><td>Đã đóng</td><td>Đơn hàng hoàn thành.</td></tr>
+        <tr><td>40</td><td>Đang xử lý</td><td>Đơn hàng đang được xử lý.</td></tr>
+      </table>
+      <h3>paymentStatus - Trạng thái thanh toán</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>New</td><td>Tạo mới.</td></tr>
+        <tr><td>Processing</td><td>Đang xử lý thanh toán.</td></tr>
+        <tr><td>Pending</td><td>Đang chờ thanh toán.</td></tr>
+        <tr><td>Failed</td><td>Thanh toán thất bại.</td></tr>
+        <tr><td>Success</td><td>Thanh toán thành công.</td></tr>
+        <tr><td>Canceled</td><td>Đã hủy đơn hàng.</td></tr>
+      </table>
+      <h3>orderType - Loại đơn hàng</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>Kiểm định phương tiện.</td></tr>
+        <tr><td>2</td><td>Thông báo tự động vi phạm phạt nguội.</td></tr>
+        <tr><td>3</td><td>Thanh toán tiền tip.</td></tr>
+        <tr><td>4</td><td>Đơn hàng thử nghiệm.</td></tr>
+        <tr><td>6</td><td>Bảo hiểm TNDS Xe máy.</td></tr>
+        <tr><td>7</td><td>Bảo hiểm TNDS Ô tô.</td></tr>
+        <tr><td>8</td><td>Bảo hiểm Thân vỏ Ô tô.</td></tr>
+        <tr><td>9</td><td>Đơn hàng từ bên ngoài.</td></tr>
+      </table>
+      <h3>orderCategory - Phân loại đơn hàng</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>Đơn hàng bình thường.</td></tr>
+        <tr><td>2</td><td>Đơn hàng có các sản phẩm được tặng.</td></tr>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

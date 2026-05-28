@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Callback / Webhooks - Dữ liệu vi phạm</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
+    .wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #dbe3ef; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+    h1, h2 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #dbe3ef; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #eef3fb; }
+    pre { background: #0f172a; color: #e5ecf6; padding: 12px; border-radius: 10px; overflow-x: auto; }
+    a { color: #0b63ce; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Callback / Webhooks - Dữ liệu vi phạm</h1>
+      <p>Mô tả dữ liệu mà đối tác nhận được khi hệ thống gửi callback liên quan đến bản ghi vi phạm của phương tiện.</p>
+      <p><a href="../index.html">Về trang chủ Partner API Documentation</a></p>
+    </div>
+
+    <div class="card">
+      <h2>Phạm vi dữ liệu</h2>
+      <p>Chỉ truy cập những dữ liệu vi phạm được ghi nhận cho phương tiện mà đối tác có liên quan.</p>
+    </div>
+
+    <div class="card">
+      <h2>Cấu trúc payload callback</h2>
+      <pre>{
+  "callbackData": {
+    "customerCriminalRecordId": 123456,
+    "customerRecordPlatenumber": "30A84812",
+    "customerRecordPlateColor": 2,
+    "customerRecordPlateColorDesc": "Xanh",
+    "vehicleType": 1,
+    "crimeRecordContent": "Vi phạm vượt đèn đỏ",
+    "crimeRecordStatus": "Chưa xử phạt",
+    "crimeRecordTime": "2026-05-15 10:30:00",
+    "crimeRecordPIC": "Công an giao thông quận 1",
+    "crimeRecordLocation": "Ngã tư Hàng Xanh, TP. HCM",
+    "crimeRecordContact": "0987654321",
+    "crimeRecordAgency": "Đội CSGT Quận 1",
+    "crimeRecordAddressPIC": "Số 1 Lê Lợi, Quận 1, TP. HCM",
+    "crimeRecordAmendmentDate": "2026-05-16",
+    "projectName": "Kiemdinhoto_StationServer",
+    "createdAt": "2026-05-15T10:45:00.000Z",
+    "updatedAt": "2026-05-15T10:45:00.000Z"
+  }
+}</pre>
+    </div>
+
+    <div class="card">
+      <h2>Dữ liệu callback</h2>
+      <table>
+        <tr><th>Field</th><th>Type</th><th>Mô tả</th></tr>
+        <tr><td>customerCriminalRecordId</td><td>number</td><td>Mã bản ghi vi phạm (primary key).</td></tr>
+        <tr><td>customerRecordPlatenumber</td><td>string</td><td>Biển số xe vi phạm.</td></tr>
+        <tr><td>customerRecordPlateColor</td><td>number</td><td>Màu biển số xe.</td></tr>
+        <tr><td>customerRecordPlateColorDesc</td><td>string</td><td>Mô tả màu biển số.</td></tr>
+        <tr><td>vehicleType</td><td>number</td><td>Loại phương tiện vi phạm.</td></tr>
+        <tr><td>crimeRecordContent</td><td>string</td><td>Nội dung vi phạm.</td></tr>
+        <tr><td>crimeRecordStatus</td><td>string</td><td>Trạng thái xử lý vi phạm.</td></tr>
+        <tr><td>crimeRecordTime</td><td>datetime</td><td>Thời gian phát hiện vi phạm.</td></tr>
+        <tr><td>crimeRecordPIC</td><td>string</td><td>Cơ quan phát hiện vi phạm.</td></tr>
+        <tr><td>crimeRecordLocation</td><td>string</td><td>Địa điểm phát hiện vi phạm.</td></tr>
+        <tr><td>crimeRecordContact</td><td>string</td><td>Số điện thoại liên hệ của cơ quan.</td></tr>
+        <tr><td>crimeRecordAgency</td><td>string</td><td>Tên đơn vị xử lý vi phạm.</td></tr>
+        <tr><td>crimeRecordAddressPIC</td><td>string</td><td>Địa chỉ đơn vị phát hiện vi phạm.</td></tr>
+        <tr><td>crimeRecordAmendmentDate</td><td>string</td><td>Ngày sửa đổi bổ sung bản ghi.</td></tr>
+        <tr><td>projectName</td><td>string</td><td>Tên hệ thống phát sinh bản ghi.</td></tr>
+        <tr><td>createdAt</td><td>datetime</td><td>Thời điểm bản ghi được tạo.</td></tr>
+        <tr><td>updatedAt</td><td>datetime</td><td>Thời điểm cập nhật gần nhất.</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Bảng liệt kê trạng thái</h2>
+      <h3>crimeRecordStatus - Trạng thái xử lý vi phạm</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>Chưa xử phạt</td><td>Vi phạm chưa được xử phạt.</td></tr>
+        <tr><td>Đã xử phạt</td><td>Vi phạm đã được xử phạt.</td></tr>
+        <tr><td>Không vi phạm</td><td>Dữ liệu không phải vi phạm thực tế.</td></tr>
+        <tr><td>Lỗi tra cứu</td><td>Có lỗi xảy ra khi tra cứu vi phạm.</td></tr>
+      </table>
+      <h3>customerRecordPlateColor - Màu biển số</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>Trắng.</td></tr>
+        <tr><td>2</td><td>Xanh.</td></tr>
+        <tr><td>3</td><td>Vàng.</td></tr>
+        <tr><td>4</td><td>Đỏ.</td></tr>
+      </table>
+      <h3>vehicleType - Loại phương tiện</h3>
+      <table>
+        <tr><th>Giá trị</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>Ô tô.</td></tr>
+        <tr><td>10</td><td>Xe khác.</td></tr>
+        <tr><td>20</td><td>Rơ moóc.</td></tr>
+        <tr><td>30</td><td>Xe máy.</td></tr>
+        <tr><td>40</td><td>Xe điện.</td></tr>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

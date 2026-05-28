@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quy chuẩn chung - Partner API</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
+    .wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #dbe3ef; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+    h1, h2 { margin-top: 0; }
+    h2 { color: #0b63ce; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #dbe3ef; padding: 8px; text-align: left; }
+    th { background: #eef3fb; }
+    code { background: #eef3fb; padding: 2px 6px; border-radius: 4px; font-size: 0.93em; }
+    a { color: #0b63ce; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav a { margin-right: 16px; }
+    .badge-required { color: #dc2626; font-weight: bold; }
+    .badge-success { color: #16a34a; }
+    .badge-failed  { color: #dc2626; }
+    .badge-pending { color: #d97706; }
+    .badge-new     { color: #6b7280; }
+    .badge-processing { color: #2563eb; }
+    .badge-canceled   { color: #374151; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Header -->
+    <div class="card">
+      <h1>Quy chuẩn chung — Partner API</h1>
+      <p>Tài liệu tham chiếu chung cho toàn bộ Partner API: mã lỗi hệ thống và danh sách trạng thái.</p>
+      <nav>
+        <a href="./index.html">← Trang chủ tài liệu</a>
+        <a href="#common-error">Common Error</a>
+        <a href="#payment-status">Order Payment Status</a>
+        <a href="#order-error-code">Partner Order Error Code</a>
+      </nav>
+    </div>
+
+    <!-- Common Error -->
+    <div class="card" id="common-error">
+      <h2>Common Error</h2>
+      <p>Các mã lỗi chung trả về trong trường <code>error</code> của response khi API thất bại.</p>
+      <table>
+        <tr>
+          <th style="width:30%">Mã lỗi</th>
+          <th>Mô tả</th>
+        </tr>
+        <tr>
+          <td><code>UNKNOWN_ERROR</code></td>
+          <td>Lỗi không xác định — hệ thống gặp tình trạng ngoài dự kiến.</td>
+        </tr>
+        <tr>
+          <td><code>NOT_FOUND</code></td>
+          <td>Không tìm thấy tài nguyên yêu cầu.</td>
+        </tr>
+        <tr>
+          <td><code>API_FAILED</code></td>
+          <td>Gọi API nội bộ hoặc API bên thứ ba thất bại.</td>
+        </tr>
+        <tr>
+          <td><code>MISSING_AUTHORITY</code></td>
+          <td>Không có quyền thực hiện thao tác này.</td>
+        </tr>
+        <tr>
+          <td><code>ERROR_START_DATE_AFTER_END_DATE</code></td>
+          <td>Ngày bắt đầu lớn hơn ngày kết thúc trong bộ lọc thời gian.</td>
+        </tr>
+        <tr>
+          <td><code>INSERT_FAILED</code></td>
+          <td>Thêm mới dữ liệu vào hệ thống thất bại.</td>
+        </tr>
+        <tr>
+          <td><code>RECORD_NOT_FOUND</code></td>
+          <td>Không tìm thấy bản ghi trong cơ sở dữ liệu.</td>
+        </tr>
+        <tr>
+          <td><code>UPDATE_FAILED</code></td>
+          <td>Cập nhật dữ liệu thất bại.</td>
+        </tr>
+        <tr>
+          <td><code>DELETE_FAILED</code></td>
+          <td>Xoá dữ liệu thất bại.</td>
+        </tr>
+      </table>
+      <p style="margin-top:12px;font-size:0.9em;color:#6b7280;">Cấu trúc response lỗi điển hình:</p>
+      <pre style="background:#0f172a;color:#e5ecf6;padding:12px;border-radius:10px;overflow-x:auto;font-size:0.92em;">{
+  "statusCode": 400,
+  "error": "RECORD_NOT_FOUND",
+  "message": "Record not found",
+  "data": null
+}</pre>
+    </div>
+
+    <!-- Order Payment Status -->
+    <div class="card" id="payment-status">
+      <h2>Order Payment Status</h2>
+      <p>Danh sách các giá trị hợp lệ của trường <code>paymentStatus</code> cho đơn hàng.</p>
+      <table>
+        <tr>
+          <th style="width:18%">Giá trị</th>
+          <th>Mô tả</th>
+        </tr>
+        <tr>
+          <td><span class="badge-new"><code>New</code></span></td>
+          <td>Đơn hàng mới tạo, chưa thực hiện thanh toán.</td>
+        </tr>
+        <tr>
+          <td><span class="badge-processing"><code>Processing</code></span></td>
+          <td>Đang xử lý thanh toán (cổng thanh toán đang phản hồi).</td>
+        </tr>
+        <tr>
+          <td><span class="badge-pending"><code>Pending</code></span></td>
+          <td>Đang chờ xác nhận thanh toán từ đối tác / hệ thống.</td>
+        </tr>
+        <tr>
+          <td><span class="badge-success"><code>Success</code></span></td>
+          <td>Thanh toán thành công. Đơn hàng đã được xác nhận.</td>
+        </tr>
+        <tr>
+          <td><span class="badge-failed"><code>Failed</code></span></td>
+          <td>Thanh toán thất bại. Cần tạo yêu cầu mới nếu muốn thử lại.</td>
+        </tr>
+        <tr>
+          <td><span class="badge-canceled"><code>Canceled</code></span></td>
+          <td>Đơn hàng đã bị hủy, không thể xử lý thêm.</td>
+        </tr>
+      </table>
+
+    </div>
+
+    <!-- Partner Order Error Code -->
+    <div class="card" id="order-error-code">
+      <h2>Partner Order Error Code</h2>
+      <p>Bảng mã số (<code>errorCode</code>) dùng cho các API Order đối tác. Trường <code>errorCode</code> được trả về cùng với <code>error</code> trong response khi xảy ra lỗi.</p>
+      <table>
+        <tr>
+          <th style="width:18%">errorCode</th>
+          <th style="width:30%">Mã lỗi (error)</th>
+          <th>Mô tả</th>
+        </tr>
+        <tr><td><code>00</code></td><td>—</td><td>Thành công.</td></tr>
+        <tr><td><code>01</code></td><td><code>UNAUTHORIZED</code></td><td>Xác thực thất bại – clientId hoặc apiKey không hợp lệ.</td></tr>
+        <tr><td><code>02</code></td><td><code>INVALID_DATA</code> / <code>REQUIRED_FIELD_MISSING</code> / <code>INVALID_AMOUNT</code> / <code>INVALID_BATCH_PAYLOAD</code></td><td>Thiếu hoặc sai tham số đầu vào.</td></tr>
+        <tr><td><code>03</code></td><td><code>ORDER_NOT_FOUND</code></td><td>Không tìm thấy đơn hàng.</td></tr>
+        <tr><td><code>04</code></td><td><code>ALREADY_PAID</code></td><td>Đơn hàng đã thanh toán trước đó (idempotent).</td></tr>
+        <tr><td><code>05</code></td><td><code>AMOUNT_MISMATCH</code></td><td>Số tiền không khớp với đơn hàng.</td></tr>
+        <tr><td><code>06</code></td><td><code>INVALID_ORDER</code></td><td>Đơn hàng không hợp lệ để gạch nợ (đã huỷ, hết hạn, ...).</td></tr>
+        <tr><td><code>99</code></td><td><code>SYSTEM_ERROR</code> / <code>INTERNAL_ERROR</code> / <code>UNKNOWN_ERROR</code></td><td>Lỗi hệ thống hoặc exception khi xử lý.</td></tr>
+      </table>
+    </div>
+
+  </div>
+</body>
+</html>
