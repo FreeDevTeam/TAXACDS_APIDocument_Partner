@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Partner API Documentation - TaxCDS</title>
+  <title>Partner API - TaxCDS</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
     .wrap { max-width: 980px; margin: 24px auto; padding: 0 16px; }
@@ -35,68 +35,80 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>Partner API Documentation - TaxCDS</h1>
-      <p>Tài liệu API tra cứu thông tin thuế dành cho đối tác.</p>
+      <h1>Partner API Module: TaxCDS</h1>
+      <p>Các API tra cứu thông tin thuế dành cho đối tác.</p>
       <p>
-        <a href="./index.md">Mở bản Markdown</a> |
-        <a href="./Common.html">Quy chuẩn chung</a>
+        <a href="../../index.html">Quay về trang chủ</a> |
+        <a href="./index.md">Mở bản Markdown module</a>
       </p>
     </div>
 
     <div class="card">
-      <h2>Module</h2>
-      <ul>
-        <li>
-          <strong>TaxCDS</strong><br/>
-          <a href="./modules/TaxCDS/index.html">Mở module TaxCDS (HTML)</a><br/>
-          <a href="./modules/TaxCDS/index.md">Mở module TaxCDS (MD)</a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Danh sách API TaxCDS</h2>
+      <h2>Danh sách API</h2>
       <ul>
         <li>
           <strong>Tra cứu mã số thuế</strong>
           <span class="badge">MST</span><br/>
           <span class="path">POST /TaxCDSMstLookup/partner/lookupMst</span><br/>
-          <a href="./modules/TaxCDS/TaxCDSMstLookup_LookupMst.html">HTML</a> |
-          <a href="./modules/TaxCDS/TaxCDSMstLookup_LookupMst.md">MD</a>
+          <a href="./TaxCDSMstLookup_LookupMst.html">HTML</a> |
+          <a href="./TaxCDSMstLookup_LookupMst.md">MD</a>
         </li>
 
         <li>
           <strong>Tra cứu tình trạng hộ kinh doanh</strong>
           <span class="badge">HKD</span><br/>
           <span class="path">POST /TaxCDSMstLookup/partner/lookupHkdStatus</span><br/>
-          <a href="./modules/TaxCDS/TaxCDSMstLookup_LookupHkdStatus.html">HTML</a> |
-          <a href="./modules/TaxCDS/TaxCDSMstLookup_LookupHkdStatus.md">MD</a>
+          <a href="./TaxCDSMstLookup_LookupHkdStatus.html">HTML</a> |
+          <a href="./TaxCDSMstLookup_LookupHkdStatus.md">MD</a>
         </li>
 
         <li>
           <strong>Tra cứu nghĩa vụ thuế</strong>
           <span class="badge">Nghĩa vụ thuế</span><br/>
           <span class="path">POST /TaxCDSObligationLookup/partner/lookupTaxObligation</span><br/>
-          <a href="./modules/TaxCDS/TaxCDSObligationLookup_LookupTaxObligation.html">HTML</a> |
-          <a href="./modules/TaxCDS/TaxCDSObligationLookup_LookupTaxObligation.md">MD</a>
+          <a href="./TaxCDSObligationLookup_LookupTaxObligation.html">HTML</a> |
+          <a href="./TaxCDSObligationLookup_LookupTaxObligation.md">MD</a>
         </li>
 
         <li>
           <strong>Tra cứu quyết toán thuế</strong>
           <span class="badge">Quyết toán</span><br/>
           <span class="path">POST /TaxCDSFinalizationLookup/partner/lookupTaxFinalization</span><br/>
-          <a href="./modules/TaxCDS/TaxCDSFinalizationLookup_LookupTaxFinalization.html">HTML</a> |
-          <a href="./modules/TaxCDS/TaxCDSFinalizationLookup_LookupTaxFinalization.md">MD</a>
+          <a href="./TaxCDSFinalizationLookup_LookupTaxFinalization.html">HTML</a> |
+          <a href="./TaxCDSFinalizationLookup_LookupTaxFinalization.md">MD</a>
         </li>
 
         <li>
           <strong>Tra cứu tình trạng nộp tờ khai</strong>
           <span class="badge">Tờ khai</span><br/>
           <span class="path">POST /TaxCDSDeclarationStatusLookup/partner/lookupDeclarationStatus</span><br/>
-          <a href="./modules/TaxCDS/TaxCDSDeclarationStatusLookup_LookupDeclarationStatus.html">HTML</a> |
-          <a href="./modules/TaxCDS/TaxCDSDeclarationStatusLookup_LookupDeclarationStatus.md">MD</a>
+          <a href="./TaxCDSDeclarationStatusLookup_LookupDeclarationStatus.html">HTML</a> |
+          <a href="./TaxCDSDeclarationStatusLookup_LookupDeclarationStatus.md">MD</a>
         </li>
       </ul>
+    </div>
+
+    <div class="card">
+      <h2>Headers chung</h2>
+      <ul>
+        <li><strong>apikey</strong>: Khóa xác thực API của đối tác.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Payload chung</h2>
+      <p>Các API tra cứu TaxCDS dùng chung cấu trúc payload:</p>
+      <pre>{
+  "filter": {
+    "taxCode": "8173748371"
+  },
+  "skip": 0,
+  "limit": 10
+}</pre>
+      <p class="note">
+        Cần truyền ít nhất một điều kiện trong <strong>filter</strong>:
+        <strong>taxCode</strong>, <strong>citizenIdentityNumber</strong> hoặc <strong>taxpayerName</strong>.
+      </p>
     </div>
 
     <div class="card">
@@ -107,7 +119,7 @@
         <li>citizenIdentityNumber: 079183000002</li>
         <li>taxpayerName: Nguyễn Văn A</li>
       </ul>
-      <p class="note">Lưu ý: chỉ dùng để test/integration, cần thay bằng dữ liệu môi trường thật trước production.</p>
+      <p class="note">Cần thay bằng dữ liệu môi trường thật khi tích hợp.</p>
     </div>
   </div>
 </body>
