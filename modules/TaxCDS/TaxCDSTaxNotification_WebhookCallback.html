@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webhook thông báo thuế</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #dbe3ef;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    h1,
+    h2 {
+      margin-top: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #dbe3ef;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eef3fb;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #e5ecf6;
+      padding: 12px;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+
+    a {
+      color: #0b63ce;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      background: #eef3fb;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .note {
+      font-size: 14px;
+      color: #4b5563;
+    }
+
+    .warning {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    button {
+      background: #0b63ce;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.95em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+
+    #toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- 1. Header -->
+    <div class="card">
+      <h1>Partner API - Webhook thông báo thuế</h1>
+
+      <p>
+        Webhook được sử dụng để gửi thông báo thuế từ hệ thống TaxCDS
+        đến hệ thống của Partner.
+      </p>
+
+      <p>
+        Khi có thông báo thuế cần gửi, TaxCDS sẽ chủ động thực hiện
+        HTTP POST tới Webhook URL do Partner cung cấp.
+      </p>
+
+      <p>
+        <a href="./index.html">Về module TaxCDS</a>
+      </p>
+    </div>
+
+    <!-- 2. Endpoint -->
+    <div class="card">
+      <h2>Endpoint</h2>
+
+      <table>
+        <tr>
+          <th>URL</th>
+          <td>Webhook URL do Partner cung cấp</td>
+        </tr>
+
+        <tr>
+          <th>Method</th>
+          <td>POST</td>
+        </tr>
+      </table>
+
+      <div class="warning">
+        Partner cần cung cấp HTTPS endpoint có khả năng nhận HTTP POST
+        từ hệ thống TaxCDS.
+      </div>
+    </div>
+
+    <!-- 3. Headers schema -->
+    <div class="card">
+      <h2>Headers schema</h2>
+
+      <table>
+        <tr>
+          <th>Header</th>
+          <th>Required</th>
+          <th>Mô tả</th>
+        </tr>
+
+        <tr>
+          <td>timestamp</td>
+          <td>Yes</td>
+          <td>
+            Unix Epoch Milliseconds tại thời điểm TaxCDS gửi webhook.
+          </td>
+        </tr>
+
+        <tr>
+          <td>nonce</td>
+          <td>Yes</td>
+          <td>
+            Chuỗi ngẫu nhiên 16 ký tự hex, tạo mới cho mỗi request.
+          </td>
+        </tr>
+
+        <tr>
+          <td>signature</td>
+          <td>Yes</td>
+          <td>
+            Chữ ký HMAC-SHA256 dạng hex lowercase dùng để Partner
+            xác thực request.
+          </td>
+        </tr>
+
+        <tr>
+          <td>Content-Type</td>
+          <td>Yes</td>
+          <td>application/json</td>
+        </tr>
+      </table>
+
+      <p style="margin-top:16px;">
+        TaxCDS và Partner được cấu hình bộ thông tin xác thực:
+      </p>
+
+      <ul>
+        <li><code>clientId</code></li>
+        <li><code>apiKey</code></li>
+        <li><code>secretKey</code></li>
+      </ul>
+
+      <p>Chuỗi dùng để tạo chữ ký:</p>
+
+      <pre>signingString = clientId + "|" + apiKey + "|" + timestamp + "|" + nonce</pre>
+
+      <p>Chữ ký được tính bằng HMAC-SHA256:</p>
+
+      <pre>signature = HMAC-SHA256(
+  key = secretKey,
+  message = signingString
+)
+
+// Output: hex lowercase</pre>
+
+      <p>
+        Body webhook <strong>không tham gia</strong> vào
+        <code>signingString</code>.
+      </p>
+
+      <div class="warning">
+        <strong>Lưu ý:</strong>
+        <code>secretKey</code> chỉ được lưu ở phía server,
+        không expose ra frontend hoặc mobile app.
+      </div>
+    </div>
+
+    <!-- 4. Body schema -->
+    <div class="card">
+      <h2>Body schema</h2>
+
+      <p>
+        Dữ liệu webhook được đóng gói trong object
+        <code>callbackData</code>.
+      </p>
+
+      <table>
+        <tr>
+          <th>Field</th>
+          <th>Type</th>
+          <th>Required</th>
+          <th>Rule</th>
+          <th>Mô tả</th>
+        </tr>
+
+        <tr>
+          <td>callbackData</td>
+          <td>object</td>
+          <td>Yes</td>
+          <td>Object</td>
+          <td>Dữ liệu thông báo thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxCDSTaxNotificationId</td>
+          <td>number</td>
+          <td>No</td>
+          <td>Số nguyên</td>
+          <td>ID thông báo thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiNotificationCode</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Mã thông báo.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiTitle</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Tiêu đề thông báo.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiContent</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Nội dung thông báo.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiMetadata</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Metadata bổ sung của thông báo.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiDocumentCode</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Mã văn bản của cơ quan thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiDocumentTitle</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Tiêu đề văn bản.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPayerIdentity</td>
+          <td>string</td>
+          <td>No</td>
+          <td>CCCD/CMND</td>
+          <td>Số định danh của người nộp thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPayerTaxCode</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Mã số thuế</td>
+          <td>Mã số thuế của người nộp thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPayerPhone</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Số điện thoại người nộp thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPayerEmail</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Email người nộp thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPayerName</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Tên người nộp thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiNotificationDate</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Datetime</td>
+          <td>Ngày ban hành thông báo.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiIssuingAuthority</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Cơ quan thuế ban hành thông báo.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiTaxPeriod</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Kỳ thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiGuidanceAuthority</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Cơ quan thuế hướng dẫn.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPICUnit</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Đơn vị phụ trách.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPICName</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Người phụ trách.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPICAddress</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Địa chỉ liên hệ.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPICPhone</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Số điện thoại liên hệ.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiPICEmail</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Có thể rỗng</td>
+          <td>Email liên hệ.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiDataClosingTime</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Datetime</td>
+          <td>Thời điểm chốt dữ liệu.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.taxNotiType</td>
+          <td>string</td>
+          <td>No</td>
+          <td>TB001 - TB008</td>
+          <td>Loại thông báo thuế.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.createdAt</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Datetime</td>
+          <td>Thời điểm tạo dữ liệu.</td>
+        </tr>
+
+        <tr>
+          <td>callbackData.updatedAt</td>
+          <td>string</td>
+          <td>No</td>
+          <td>Datetime</td>
+          <td>Thời điểm cập nhật dữ liệu.</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 5. Sample Request -->
+    <div class="card">
+      <h2 style="display:flex;align-items:center;gap:8px;">
+        Sample Request
+
+        <button
+          id="copySampleBtn"
+          title="Copy sang clipboard"
+          style="
+            background:none;
+            border:1px solid #dbe3ef;
+            border-radius:6px;
+            padding:4px 8px;
+            cursor:pointer;
+            display:inline-flex;
+            align-items:center;
+          "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="#0b63ce"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"
+            />
+            <path
+              d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"
+            />
+          </svg>
+        </button>
+      </h2>
+
+      <pre id="curlText">curl --location 'https://partner.example.com/webhooks/tax-notification' \
+  --header 'Content-Type: application/json' \
+  --header 'timestamp: 1787191200000' \
+  --header 'nonce: a3f9b2c1d4e5f607' \
+  --header 'signature: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef' \
+  --data '{
+  "callbackData": {
+    "taxCDSTaxNotificationId": 999999,
+    "taxNotiNotificationCode": "TAXCDS-NOTI-0001",
+    "taxNotiTitle": "Thông báo về Tiền thuế nợ",
+    "taxNotiContent": "Anh (chị) có một Thông báo về Tiền thuế nợ (mẫu 01/TTN)",
+    "taxNotiDocumentCode": "123/TB-CQT",
+    "taxNotiDocumentTitle": "Thông báo về Tiền thuế nợ",
+    "taxNotiPayerIdentity": "079999999999",
+    "taxNotiPayerTaxCode": "0319998888",
+    "taxNotiPayerName": "Nguyễn Văn A",
+    "taxNotiNotificationDate": "2026-08-18 00:00:00",
+    "taxNotiIssuingAuthority": "Thuế cơ sở Y",
+    "taxNotiTaxPeriod": "2025",
+    "taxNotiGuidanceAuthority": "Thuế cơ sở Y",
+    "taxNotiPICUnit": "Tổ Quản lý hộ kinh doanh số X",
+    "taxNotiPICName": "Nguyễn Văn B",
+    "taxNotiPICEmail": "developer@example.com",
+    "taxNotiDataClosingTime": "2026-08-18 17:30:00",
+    "taxNotiType": "TB005"
+  }
+}'</pre>
+    </div>
+
+    <!-- 6. Success response -->
+    <div class="card">
+      <h2>Success response</h2>
+
+      <p>
+        Khi Partner xác thực và xử lý webhook thành công,
+        Partner trả HTTP <code>200 OK</code>.
+      </p>
+
+      <pre>{
+  "success": true
+}</pre>
+
+      <p class="note">
+        Nội dung response có thể phụ thuộc vào hệ thống Partner.
+        TaxCDS sử dụng kết quả HTTP response để ghi nhận kết quả gửi webhook.
+      </p>
+    </div>
+
+    <!-- 7. Mã lỗi -->
+    <div class="card">
+      <h2>Mã lỗi</h2>
+
+      <table>
+        <tr>
+          <th style="width:100px">HTTP</th>
+          <th style="width:35%">Mã lỗi</th>
+          <th>Mô tả</th>
+        </tr>
+
+        <tr>
+          <td>200</td>
+          <td>—</td>
+          <td>
+            Partner xác thực và xử lý webhook thành công.
+          </td>
+        </tr>
+
+        <tr>
+          <td>401</td>
+          <td>—</td>
+          <td>
+            Partner từ chối request do timestamp, nonce
+            hoặc signature không hợp lệ.
+          </td>
+        </tr>
+
+        <tr>
+          <td>500</td>
+          <td>—</td>
+          <td>
+            Hệ thống Partner gặp lỗi trong quá trình xử lý webhook.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 8. Tham khảo -->
+    <div class="card">
+      <h2>Tham khảo</h2>
+
+      <ul>
+        <li>
+          <a href="../../Common.html#common-error">
+            Quy chuẩn chung → Common Error
+          </a>
+          — tham khảo quy chuẩn lỗi chung của hệ thống.
+        </li>
+      </ul>
+    </div>
+
+    <!-- 9. Data test -->
+    <div class="card">
+      <h2>Data test cho developer</h2>
+
+      <ul>
+        <li>
+          Webhook URL:
+          <code>https://partner.example.com/webhooks/tax-notification</code>
+        </li>
+        <li>
+          clientId: sử dụng credential môi trường test do TaxCDS cấp.
+        </li>
+        <li>
+          apiKey: sử dụng credential môi trường test do TaxCDS cấp.
+        </li>
+        <li>
+          secretKey: sử dụng credential môi trường test do TaxCDS cấp.
+        </li>
+        <li>
+          taxNotiPayerIdentity:
+          <code>079999999999</code>
+        </li>
+        <li>
+          taxNotiPayerTaxCode:
+          <code>0319998888</code>
+        </li>
+        <li>
+          taxNotiType:
+          <code>TB005</code>
+        </li>
+      </ul>
+
+      <p class="note">
+        Cần thay bằng dữ liệu môi trường thật khi tích hợp.
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    const copySampleBtn = document.getElementById('copySampleBtn');
+    const curlText = document.getElementById('curlText').textContent;
+
+    copySampleBtn.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(curlText);
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    });
+  </script>
+
+  <div id="toast">Sao chép thành công</div>
+</body>
+</html>
