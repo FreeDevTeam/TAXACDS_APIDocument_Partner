@@ -83,6 +83,16 @@ Tài liệu:
 
 ---
 
+
+### 6. Webhook thông báo thuế
+
+TaxCDS chủ động gửi thông báo thuế đến Webhook URL do Partner cung cấp.
+
+Method:
+
+```txt
+POST
+
 ## Headers chung
 
 | Header | Required | Mô tả |
