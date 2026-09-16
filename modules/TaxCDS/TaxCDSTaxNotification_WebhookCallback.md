@@ -1,6 +1,7 @@
 # Partner API - Webhook thông báo thuế
 
-> **⚠️ QUAN TRỌNG:** Tất cả callback POST từ hệ thống TaxCDS đến Partner đều bắt buộc phải được xác thực. Vui lòng tham khảo phần [Hướng dẫn xác thực Webhook Callback](#webhook-authentication).
+> **⚠️ QUAN TRỌNG:** Tất cả callback POST từ hệ thống TaxCDS đến Partner đều bắt buộc phải được xác thực. Vui lòng đọc [Hướng dẫn xác thực Webhook Callback (Authentication Guide)](https://partner-api-document.service.makefamousapp.com/callback-webhooks/Webhook_Authentication.html) để cấu hình và kiểm tra chữ ký.
+
 
 Webhook được sử dụng để gửi thông báo thuế từ hệ thống TaxCDS đến hệ thống của Partner.
 
