@@ -138,6 +138,27 @@
         <a href="./index.html">Về module TaxCDS</a>
       </p>
     </div>
+    <!-- Webhook authentication notice -->
+    <div class="card" style="border-left: 4px solid #f59e0b; background-color: #fffbeb;">
+      <h3 style="margin-top: 0; color: #b45309;">
+        ⚠️ Yêu cầu xác thực Webhook (Authentication Required)
+      </h3>
+
+      <p style="margin-bottom: 0; font-size: 14px;">
+        Tất cả callback POST từ hệ thống TaxCDS đến Partner đều bắt buộc
+        phải được xác thực để bảo đảm an toàn và bảo mật.
+
+        Vui lòng đọc kỹ hướng dẫn cấu hình và kiểm tra chữ ký tại:
+        <strong>
+          <a
+            href="#webhook-authentication"
+            style="color: #b45309; text-decoration: underline;"
+          >
+            Hướng dẫn xác thực Webhook Callback
+          </a>
+        </strong>.
+      </p>
+    </div>
 
     <!-- 2. Endpoint -->
     <div class="card">
@@ -162,8 +183,15 @@
     </div>
 
     <!-- 3. Headers schema -->
-    <div class="card">
-      <h2>Headers schema</h2>
+    <div class="card" id="webhook-authentication">
+      <h2>Xác thực Webhook Callback</h2>
+
+      <p>
+        Mỗi callback POST do TaxCDS gửi đến Partner đều kèm theo
+        các header xác thực sau:
+      </p>
+
+      <h3>HTTP Headers</h3>
 
       <table>
         <tr>
@@ -173,39 +201,41 @@
         </tr>
 
         <tr>
-          <td>timestamp</td>
+          <td><code>timestamp</code></td>
           <td>Yes</td>
           <td>
-            Unix Epoch Milliseconds tại thời điểm TaxCDS gửi webhook.
+            Unix Epoch Milliseconds (UTC) tại thời điểm TaxCDS gửi webhook.
           </td>
         </tr>
 
         <tr>
-          <td>nonce</td>
+          <td><code>nonce</code></td>
           <td>Yes</td>
           <td>
-            Chuỗi ngẫu nhiên 16 ký tự hex, tạo mới cho mỗi request.
+            Chuỗi ngẫu nhiên 16 ký tự hex, duy nhất cho mỗi request,
+            dùng để chống replay attack.
           </td>
         </tr>
 
         <tr>
-          <td>signature</td>
+          <td><code>signature</code></td>
           <td>Yes</td>
           <td>
-            Chữ ký HMAC-SHA256 dạng hex lowercase dùng để Partner
-            xác thực request.
+            Chữ ký HMAC-SHA256, encode Hex lowercase gồm 64 ký tự.
           </td>
         </tr>
 
         <tr>
-          <td>Content-Type</td>
+          <td><code>Content-Type</code></td>
           <td>Yes</td>
-          <td>application/json</td>
+          <td><code>application/json</code></td>
         </tr>
       </table>
 
-      <p style="margin-top:16px;">
-        TaxCDS và Partner được cấu hình bộ thông tin xác thực:
+      <h3>Cách tính Signature</h3>
+
+      <p>
+        TaxCDS và Partner được cấu hình riêng bộ thông tin xác thực:
       </p>
 
       <ul>
@@ -214,28 +244,96 @@
         <li><code>secretKey</code></li>
       </ul>
 
-      <p>Chuỗi dùng để tạo chữ ký:</p>
+      <p>
+        Tạo <code>signingString</code> theo đúng thứ tự,
+        sử dụng ký tự <code>|</code> làm dấu phân cách:
+      </p>
 
       <pre>signingString = clientId + "|" + apiKey + "|" + timestamp + "|" + nonce</pre>
 
-      <p>Chữ ký được tính bằng HMAC-SHA256:</p>
+      <p>
+        Sau đó tính HMAC-SHA256, sử dụng
+        <code>secretKey</code> làm khóa:
+      </p>
 
       <pre>signature = HMAC-SHA256(
   key = secretKey,
   message = signingString
 )
 
-// Output: hex lowercase</pre>
-
-      <p>
-        Body webhook <strong>không tham gia</strong> vào
-        <code>signingString</code>.
-      </p>
+// Output: Hex lowercase, 64 ký tự</pre>
 
       <div class="warning">
         <strong>Lưu ý:</strong>
-        <code>secretKey</code> chỉ được lưu ở phía server,
-        không expose ra frontend hoặc mobile app.
+        Body webhook <strong>không tham gia</strong> vào
+        <code>signingString</code>.
+      </div>
+
+      <h3>Kiểm tra xác thực phía Partner</h3>
+
+      <p>
+        Partner thực hiện lần lượt các bước sau. Nếu bất kỳ bước nào
+        không hợp lệ, Partner phải trả HTTP <code>401</code>.
+      </p>
+
+      <table>
+        <tr>
+          <th>Bước</th>
+          <th>Kiểm tra</th>
+          <th>Điều kiện không hợp lệ</th>
+        </tr>
+
+        <tr>
+          <td>1</td>
+          <td>Timestamp</td>
+          <td>
+            <code>|now_ms - timestamp| &gt; 300,000 ms</code>
+            (lệch quá 5 phút).
+          </td>
+        </tr>
+
+        <tr>
+          <td>2</td>
+          <td>Nonce</td>
+          <td>
+            Nonce đã được sử dụng trong vòng 10 phút gần nhất.
+          </td>
+        </tr>
+
+        <tr>
+          <td>3</td>
+          <td>Signature</td>
+          <td>
+            Chữ ký Partner tự tính không khớp với header
+            <code>signature</code>.
+          </td>
+        </tr>
+      </table>
+
+      <p class="note">
+        Partner nên lưu nonce theo key
+        <code>clientId:nonce</code> với TTL 10 phút.
+        Có thể sử dụng Redis <code>SET NX EX</code> hoặc unique constraint
+        trong cơ sở dữ liệu.
+      </p>
+
+      <div class="warning">
+        <strong>Yêu cầu bảo mật:</strong>
+
+        <ul>
+          <li>
+            So sánh chữ ký bằng hàm constant-time, không sử dụng
+            phép so sánh chuỗi thông thường.
+          </li>
+          <li>
+            <code>secretKey</code> chỉ được lưu phía server,
+            không đưa lên frontend, mobile app hoặc log.
+          </li>
+          <li>Webhook URL bắt buộc sử dụng HTTPS.</li>
+          <li>
+            Mỗi request phải sử dụng một nonce mới và không được tái sử dụng.
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -244,7 +342,9 @@
       <h2>Body schema</h2>
 
       <p>
-        Dữ liệu webhook được đóng gói trong object
+        Dữ liệu webhook gồm 3 object cấp cao nhất:
+        <code>customerData</code>,
+        <code>serviceData</code> và
         <code>callbackData</code>.
       </p>
 
@@ -256,6 +356,32 @@
           <th>Rule</th>
           <th>Mô tả</th>
         </tr>
+        <tr>
+  <td>customerData</td>
+  <td>object</td>
+  <td>Yes</td>
+  <td>Object</td>
+  <td>Thông tin định danh người nộp thuế.</td>
+</tr>
+
+<tr>
+  <td>customerData.customerIdentifier</td>
+  <td>string</td>
+  <td>Yes</td>
+  <td>Mã số thuế</td>
+  <td>Mã số thuế của người nhận thông báo.</td>
+</tr>
+
+      <tr>
+        <td>serviceData</td>
+        <td>object</td>
+        <td>Yes</td>
+        <td>Có thể là object rỗng</td>
+        <td>
+          Thông tin dịch vụ liên quan. Trường hợp chưa có dữ liệu,
+          TaxCDS gửi object rỗng <code>{}</code>.
+        </td>
+      </tr>
 
         <tr>
           <td>callbackData</td>
@@ -507,8 +633,12 @@
   --header 'timestamp: 1787191200000' \
   --header 'nonce: a3f9b2c1d4e5f607' \
   --header 'signature: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef' \
-  --data '{
-  "callbackData": {
+--data '{
+    "customerData": {
+      "customerIdentifier": "0319998888"
+    },
+    "serviceData": {},
+    "callbackData": {
     "taxCDSTaxNotificationId": 999999,
     "taxNotiNotificationCode": "TAXCDS-NOTI-0001",
     "taxNotiTitle": "Thông báo về Tiền thuế nợ",
