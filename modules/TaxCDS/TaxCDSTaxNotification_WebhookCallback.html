@@ -151,7 +151,7 @@
         Vui lòng đọc kỹ hướng dẫn cấu hình và kiểm tra chữ ký tại:
         <strong>
           <a
-            href="https://partner-api-document.service.makefamousapp.com/callback-webhooks/Webhook_Authentication.html"
+            href="../../callback-webhooks/Webhook_Authentication.html"
             style="color: #b45309; text-decoration: underline;"
           >
             Hướng dẫn xác thực Webhook Callback
@@ -179,161 +179,6 @@
       <div class="warning">
         Partner cần cung cấp HTTPS endpoint có khả năng nhận HTTP POST
         từ hệ thống TaxCDS.
-      </div>
-    </div>
-
-    <!-- 3. Headers schema -->
-    <div class="card" id="webhook-authentication">
-      <h2>Xác thực Webhook Callback</h2>
-
-      <p>
-        Mỗi callback POST do TaxCDS gửi đến Partner đều kèm theo
-        các header xác thực sau:
-      </p>
-
-      <h3>HTTP Headers</h3>
-
-      <table>
-        <tr>
-          <th>Header</th>
-          <th>Required</th>
-          <th>Mô tả</th>
-        </tr>
-
-        <tr>
-          <td><code>timestamp</code></td>
-          <td>Yes</td>
-          <td>
-            Unix Epoch Milliseconds (UTC) tại thời điểm TaxCDS gửi webhook.
-          </td>
-        </tr>
-
-        <tr>
-          <td><code>nonce</code></td>
-          <td>Yes</td>
-          <td>
-            Chuỗi ngẫu nhiên 16 ký tự hex, duy nhất cho mỗi request,
-            dùng để chống replay attack.
-          </td>
-        </tr>
-
-        <tr>
-          <td><code>signature</code></td>
-          <td>Yes</td>
-          <td>
-            Chữ ký HMAC-SHA256, encode Hex lowercase gồm 64 ký tự.
-          </td>
-        </tr>
-
-        <tr>
-          <td><code>Content-Type</code></td>
-          <td>Yes</td>
-          <td><code>application/json</code></td>
-        </tr>
-      </table>
-
-      <h3>Cách tính Signature</h3>
-
-      <p>
-        TaxCDS và Partner được cấu hình riêng bộ thông tin xác thực:
-      </p>
-
-      <ul>
-        <li><code>clientId</code></li>
-        <li><code>apiKey</code></li>
-        <li><code>secretKey</code></li>
-      </ul>
-
-      <p>
-        Tạo <code>signingString</code> theo đúng thứ tự,
-        sử dụng ký tự <code>|</code> làm dấu phân cách:
-      </p>
-
-      <pre>signingString = clientId + "|" + apiKey + "|" + timestamp + "|" + nonce</pre>
-
-      <p>
-        Sau đó tính HMAC-SHA256, sử dụng
-        <code>secretKey</code> làm khóa:
-      </p>
-
-      <pre>signature = HMAC-SHA256(
-  key = secretKey,
-  message = signingString
-)
-
-// Output: Hex lowercase, 64 ký tự</pre>
-
-      <div class="warning">
-        <strong>Lưu ý:</strong>
-        Body webhook <strong>không tham gia</strong> vào
-        <code>signingString</code>.
-      </div>
-
-      <h3>Kiểm tra xác thực phía Partner</h3>
-
-      <p>
-        Partner thực hiện lần lượt các bước sau. Nếu bất kỳ bước nào
-        không hợp lệ, Partner phải trả HTTP <code>401</code>.
-      </p>
-
-      <table>
-        <tr>
-          <th>Bước</th>
-          <th>Kiểm tra</th>
-          <th>Điều kiện không hợp lệ</th>
-        </tr>
-
-        <tr>
-          <td>1</td>
-          <td>Timestamp</td>
-          <td>
-            <code>|now_ms - timestamp| &gt; 300,000 ms</code>
-            (lệch quá 5 phút).
-          </td>
-        </tr>
-
-        <tr>
-          <td>2</td>
-          <td>Nonce</td>
-          <td>
-            Nonce đã được sử dụng trong vòng 10 phút gần nhất.
-          </td>
-        </tr>
-
-        <tr>
-          <td>3</td>
-          <td>Signature</td>
-          <td>
-            Chữ ký Partner tự tính không khớp với header
-            <code>signature</code>.
-          </td>
-        </tr>
-      </table>
-
-      <p class="note">
-        Partner nên lưu nonce theo key
-        <code>clientId:nonce</code> với TTL 10 phút.
-        Có thể sử dụng Redis <code>SET NX EX</code> hoặc unique constraint
-        trong cơ sở dữ liệu.
-      </p>
-
-      <div class="warning">
-        <strong>Yêu cầu bảo mật:</strong>
-
-        <ul>
-          <li>
-            So sánh chữ ký bằng hàm constant-time, không sử dụng
-            phép so sánh chuỗi thông thường.
-          </li>
-          <li>
-            <code>secretKey</code> chỉ được lưu phía server,
-            không đưa lên frontend, mobile app hoặc log.
-          </li>
-          <li>Webhook URL bắt buộc sử dụng HTTPS.</li>
-          <li>
-            Mỗi request phải sử dụng một nonce mới và không được tái sử dụng.
-          </li>
-        </ul>
       </div>
     </div>
 
@@ -749,6 +594,12 @@
         </li>
         <li>
           secretKey: sử dụng credential môi trường test do TaxCDS cấp.
+        </li>
+        <li>
+          customerData.customerIdentifier: <code>0319998888</code>
+        </li>
+        <li>
+          serviceData: <code>{}</code>
         </li>
         <li>
           taxNotiPayerIdentity:

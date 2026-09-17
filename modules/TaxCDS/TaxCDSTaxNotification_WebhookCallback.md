@@ -1,7 +1,6 @@
 # Partner API - Webhook thông báo thuế
 
-> **⚠️ QUAN TRỌNG:** Tất cả callback POST từ hệ thống TaxCDS đến Partner đều bắt buộc phải được xác thực. Vui lòng đọc [Hướng dẫn xác thực Webhook Callback (Authentication Guide)](https://partner-api-document.service.makefamousapp.com/callback-webhooks/Webhook_Authentication.html) để cấu hình và kiểm tra chữ ký.
-
+> **⚠️ QUAN TRỌNG:** Tất cả callback POST từ TaxCDS đến Partner đều phải được xác thực. Đọc [Hướng dẫn xác thực Webhook Callback (Authentication Guide)](../../callback-webhooks/Webhook_Authentication.md) để cấu hình và kiểm tra chữ ký.
 
 Webhook được sử dụng để gửi thông báo thuế từ hệ thống TaxCDS đến hệ thống của Partner.
 
@@ -19,69 +18,6 @@ Khi có thông báo thuế cần gửi, TaxCDS sẽ chủ động thực hiện 
 | Method | `POST` |
 
 Partner cần cung cấp HTTPS endpoint có khả năng nhận HTTP POST từ TaxCDS.
-
----
-
-<a id="webhook-authentication"></a>
-
-## Xác thực Webhook Callback
-
-Mỗi callback POST do TaxCDS gửi đến Partner đều kèm theo các header xác thực sau:
-
-### HTTP Headers
-
-| Header | Required | Mô tả |
-|---|---|---|
-| `timestamp` | Yes | Unix Epoch Milliseconds (UTC) tại thời điểm TaxCDS gửi webhook |
-| `nonce` | Yes | Chuỗi ngẫu nhiên 16 ký tự hex, duy nhất cho mỗi request, dùng để chống replay attack |
-| `signature` | Yes | Chữ ký HMAC-SHA256, encode Hex lowercase gồm 64 ký tự |
-| `Content-Type` | Yes | `application/json` |
-
-### Cách tính Signature
-
-TaxCDS và Partner được cấu hình riêng bộ thông tin xác thực:
-
-- `clientId`
-- `apiKey`
-- `secretKey`
-
-Tạo `signingString` theo đúng thứ tự, sử dụng ký tự `|` làm dấu phân cách:
-
-```text
-signingString = clientId + "|" + apiKey + "|" + timestamp + "|" + nonce
-```
-
-Sau đó tính HMAC-SHA256, sử dụng `secretKey` làm khóa:
-
-```text
-signature = HMAC-SHA256(
-  key = secretKey,
-  message = signingString
-)
-```
-
-Kết quả chữ ký phải được encode thành Hex lowercase gồm 64 ký tự.
-
-> **Lưu ý:** Body webhook **không tham gia** vào `signingString`.
-
-### Kiểm tra xác thực phía Partner
-
-Partner thực hiện lần lượt các bước sau. Nếu bất kỳ bước nào không hợp lệ, Partner phải trả HTTP `401`.
-
-| Bước | Kiểm tra | Điều kiện không hợp lệ |
-|---|---|---|
-| 1 | Timestamp | `\|now_ms - timestamp\| > 300,000 ms` — lệch quá 5 phút |
-| 2 | Nonce | Nonce đã được sử dụng trong vòng 10 phút gần nhất |
-| 3 | Signature | Chữ ký Partner tự tính không khớp với header `signature` |
-
-Partner nên lưu nonce theo key `clientId:nonce` với TTL 10 phút. Có thể sử dụng Redis `SET NX EX` hoặc unique constraint trong cơ sở dữ liệu.
-
-### Yêu cầu bảo mật
-
-- So sánh chữ ký bằng hàm constant-time, không sử dụng phép so sánh chuỗi thông thường.
-- `secretKey` chỉ được lưu phía server; không đưa lên frontend, mobile app hoặc log.
-- Webhook URL bắt buộc sử dụng HTTPS.
-- Mỗi request phải sử dụng một nonce mới và không được tái sử dụng.
 
 ---
 
